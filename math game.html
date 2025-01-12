@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            margin: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Math Game</h1>
+        <div id="startScreen">
+            <h2>Select Difficulty</h2>
+            <button onclick="startGame('easy')">Easy</button>
+            <button onclick="startGame('medium')">Medium</button>
+            <button onclick="startGame('hard')">Hard</button>
+        </div>
+        <div id="gameScreen" class="hidden">
+            <h2 id="problem"></h2>
+            <input type="text" id="answer" placeholder="Your answer">
+            <button onclick="checkAnswer()">Submit</button>
+            <p id="timer">Time: 0s</p>
+            <p id="progress"></p>
+            <p id="score">Score: 0</p>
+        </div>
+        <div id="resultScreen" class="hidden">
+            <h2>Results</h2>
+            <p id="finalTime"></p>
+            <p id="finalScore"></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let timerInterval;
+        let startTime;
+        let currentProblem = 0;
+        let correctAnswers = 0;
+        let problems = [];
+        let score = 0;
+
+        function startGame(level) {
+            problems = generateProblems(level);
+            currentProblem = 0;
+            correctAnswers = 0;
+            score = 0;
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('timer').innerText = 'Time: 0s';
+            document.getElementById('score').innerText = 'Score: 0';
+            startTimer();
+            showProblem();
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('timer').innerText = `Time: ${elapsedTime}s`;
+            }, 1000);
+        }
+
+        function generateProblems(level) {
+            let numberOfProblems = level === 'easy' ? 10 : level === 'medium' ? 20 : 30;
+            let problemsArray = [];
+            for (let i = 0; i < numberOfProblems; i++) {
+                let problem = '';
+                for (let j = 0; j < 5 + Math.floor(Math.random() * 2); j++) {
+                    problem += Math.floor(Math.random() * 10) + (j % 2 === 0 ? '+' : '-');
+                }
+                problem = problem.slice(0, -1);
+                problemsArray.push(problem);
+            }
+            return problemsArray;
+        }
+
+        function showProblem() {
+            if (currentProblem < problems.length) {
+                document.getElementById('problem').innerText = problems[currentProblem];
+                document.getElementById('answer').value = '';
+                document.getElementById('answer').focus();
+                document.getElementById('progress').innerText = `Problem ${currentProblem + 1} of ${problems.length}`;
+            } else {
+                endGame();
+            }
+        }
+
+        function checkAnswer() {
+            let userAnswer = parseInt(document.getElementById('answer').value, 10);
+            let correctAnswer = eval(problems[currentProblem]);
+            if (userAnswer === correctAnswer) {
+                correctAnswers++;
+                score += 10;
+                currentProblem++;
+                showProblem();
+            } else {
+                score -= 5;
+            }
+            document.getElementById('score').innerText = `Score: ${score}`;
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            let finalTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('finalTime').innerText = `Your time: ${finalTime}s`;
+            document.getElementById('finalScore').innerText = `Final score: ${score}`;
+        }
+
+        function restartGame() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
